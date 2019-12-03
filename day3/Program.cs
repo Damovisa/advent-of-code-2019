@@ -6,15 +6,14 @@ namespace day3
 {
     class Program
     {
-        public static Dictionary<(int, int), int> grid = new Dictionary<(int, int), int>();
-        public static List<(int,int)> crosses = new List<(int, int)>();
+        public static Dictionary<(int X, int Y), (int Wire, int Steps)> grid = new Dictionary<(int, int), (int, int)>();
+        public static List<(int X, int Y, int Steps)> crosses = new List<(int, int, int)>();
         static (int X, int Y) position = (X: 0, Y: 0);
 
         static void Main(string[] args)
         {
             // PART 1
-            var input = System.IO.File.ReadAllText("input.txt");
-            var wires = input.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+            var wires = System.IO.File.ReadAllLines("input.txt");
 
             var wirenum = 0;
             foreach (var ws in wires)
@@ -22,6 +21,7 @@ namespace day3
                 wirenum++;
                 position = (X: 0, Y: 0);
                 var instructions = ws.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                var steps = 0;
                 foreach (var w in instructions)
                 {
                     var dir = w.Substring(0, 1);
@@ -33,7 +33,8 @@ namespace day3
                             for (int i = 0; i < count; i++)
                             {
                                 position.X--;
-                                Move(wirenum);
+                                steps++;
+                                Move(wirenum, steps);
                             }
                             break;
 
@@ -41,7 +42,8 @@ namespace day3
                             for (int i = 0; i < count; i++)
                             {
                                 position.X++;
-                                Move(wirenum);
+                                steps++;
+                                Move(wirenum, steps);
                             }
                             break;
 
@@ -49,7 +51,8 @@ namespace day3
                             for (int i = 0; i < count; i++)
                             {
                                 position.Y++;
-                                Move(wirenum);
+                                steps++;
+                                Move(wirenum, steps);
                             }
                             break;
 
@@ -57,7 +60,8 @@ namespace day3
                             for (int i = 0; i < count; i++)
                             {
                                 position.Y--;
-                                Move(wirenum);
+                                steps++;
+                                Move(wirenum, steps);
                             }
                             break;
 
@@ -68,28 +72,30 @@ namespace day3
             }
 
             // get min
-            crosses.Sort((c,c2) => (Math.Abs(c.Item1)+Math.Abs(c.Item2)).CompareTo((Math.Abs(c2.Item1)+Math.Abs(c2.Item2))));
+            crosses.Sort((c, c2) => c.Steps.CompareTo(c2.Steps));
             Console.WriteLine(crosses[0]);
         }
 
 
-        public static void Move(int wirenum)
+        public static void Move(int wirenum, int steps)
         {
             if (grid.ContainsKey((position.X, position.Y)))
             {
-                if (grid[(position.X, position.Y)] == wirenum)
+                if (grid[(position.X, position.Y)].Wire == wirenum)
                 {
-                    // no need to do anything
+                    // no need to do anything if it's this wire
                 }
                 else
                 {
-                    grid[(position.X, position.Y)] = 0;
-                    crosses.Add((position.X, position.Y));
+                    // zero means hit
+                    var addedSteps = steps + grid[(position.X, position.Y)].Steps;
+                    grid[(position.X, position.Y)] = (0, addedSteps);
+                    crosses.Add((position.X, position.Y, addedSteps));
                 }
             }
             else
             {
-                grid[(position.X, position.Y)] = wirenum;
+                grid[(position.X, position.Y)] = (wirenum, steps);
             }
         }
     }
