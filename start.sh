@@ -1,4 +1,4 @@
-mkdir $0
-cd $0
+mkdir $1
+cd $1
 dotnet new console
 code .
